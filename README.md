@@ -1,34 +1,68 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Using this project
 
-First, run the development server:
+Clone the repo and `npm install`
 
-```bash
-npm run dev
-# or
-yarn dev
+# Husky Setup - From Scratch
+
+### Step 1: Install `husky` as a dev dependency
+
+```
+npm install husky --save-dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Step 2: Enable Git Hooks
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```
+npx husky install
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+### Step 3: Add `prepare` script to `package.json` to enable Git hooks on `npm install`
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```
+npm pkg set scripts.prepare="husky install"
+```
 
-## Learn More
+OR
 
-To learn more about Next.js, take a look at the following resources:
+```
+npm set-script prepare "husky install"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Step 4: Add a hook
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```
+npx husky add .husky/pre-commit "npm test"
+```
 
-## Deploy on Vercel
+This generates the .husky/pre-commit file which can be pushed (to share husky config)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Step 5: Make a commit.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The added hooks will run before the commit, and failure will prevent the commit.
+
+# Setting up branch name validation
+
+### Step 1: Install `validate-branch-name` as a dev dependency
+
+```
+npm install validate-branch-name --save-dev
+```
+
+### Step 2: Add config for `validate-branch-name` in `package.json`
+
+```
+// package.json
+
+"validate-branch-name": {
+		"pattern": "^(main|develop){1}$|^(feature|hotfix)/[a-z0-9-_]+$",
+		"errorMsg": "Invalid branch name. \n 1.Branch names can contain lowercase characters, numbers, hyphen and underscore. \n 2.Except for 'main' and 'develop', branch names must begin with 'feature/' or 'hotfix/' "
+	},
+```
+
+### Step 3: Update .husky/pre-commit with a new hook
+
+```
+npx husky add .husky/pre-commit "npx validate-branch-name"
+```
